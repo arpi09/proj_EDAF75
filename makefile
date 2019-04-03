@@ -50,3 +50,6 @@ customers:
 test:
 	make reset
 	curl -X POST http://127.0.0.1:5000/pallets\?cookie\=Berliner
+
+create_db:
+	sqlite3 data.db < code.sql
