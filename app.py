@@ -115,9 +115,30 @@ def reset():
         return 'OK' + '\n'
 
 
+<<<<<<< HEAD
 @app.route('/cookies', methods=['GET'])
 def cookies():
     connection = sqlite3.connect("data.db")
+=======
+@app.route('/customers')
+def movies():
+    connection = sqlite3.connect("data.db")
+    connection.row_factory = dict_factory
+    cursor = connection.cursor()
+
+    query = "SELECT * FROM customers "
+    print(query)
+    result = cursor.execute(query).fetchall()
+
+    
+
+    return json.dumps(result, indent=4) + '\n'
+
+
+@app.route('/movies/<IMDBKey>')
+def imdbkey(IMDBKey):
+    connection = sqlite3.connect("database.db")
+>>>>>>> 2f758a4e9c81d5f78c1a05d5c41eb1c9a2991166
     connection.row_factory = dict_factory
     cursor = connection.cursor()
     query = """
