@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify, request
 import json
 import sqlite3
 import hashlib
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -35,7 +36,7 @@ def reset():
         insert_curs = connection.cursor()
 
         query_insert = """
-                INSERT INTO customers (Customer_name, Customer_address)
+                INSERT INTO customers (customer_name, customer_address)
                 VALUES ( 'Finkakor AB',   'Helsingborg'  ),
                        ( 'Småbröd AB',    'Malmö'        ),
                        ( 'Kaffebröd AB',  'Landskrona'   ),
@@ -45,7 +46,7 @@ def reset():
                        ( 'Gästkakor AB',  'Hässleholm'   ),
                        ( 'Skånekakor AB', 'Perstorp'     );
 
-                INSERT INTO cookies (Cookie_name)
+                INSERT INTO cookies (cookie_name)
                 VALUES  ( 'Nut ring'      ),
                         ( 'Nut cookie'    ),
                         ( 'Amneris'       ),
@@ -53,7 +54,7 @@ def reset():
                         ( 'Almond delight'),
                         ( 'Berliner'      );
 
-               INSERT INTO ingredients ( Ingredient_name, Unit , Storage_amount, Last_delivery_date, Last_delivery_amount)
+               INSERT INTO ingredients ( ingredient_name, Unit , storage_amount, last_delivery_date, last_delivery_amount)
                VALUES   ( 'Flour',                 'g',     100000,    date('now'),   100000),
                         ( 'Butter',                'g',     100000,    date('now'),   100000),
                         ( 'Icing sugar',           'g',     100000,    date('now'),   100000),
@@ -74,7 +75,7 @@ def reset():
                         ( 'Cinnamon',              'g',     100000,    date('now'),   100000),
                         ( 'Vanilla sugar',         'g',     100000,    date('now'),   100000);
 
-               INSERT INTO cookie_contents ( Ingredient_amount, Cookie_name, Ingredient_name)
+               INSERT INTO cookie_contents ( ingredient_amount, cookie_name, ingredient_name)
                VALUES   ( 450,   'Nut ring',    'Flour'                 ),
                         ( 450,   'Nut ring',    'Butter'                ),
                         ( 190,   'Nut ring',    'Icing sugar'           ),
@@ -106,18 +107,45 @@ def reset():
                         ( 50,    'Berliner',    'Eggs'                  ),
                         ( 5,     'Berliner',    'Vanilla sugar'         ),
                         ( 50,    'Berliner',    'Chocolate'             );
-
-
-            """.format(hash("dobido"),hash("whatsinaname"))
+            """
 
         insert_curs.executescript(query_insert)
 
         return 'OK' + '\n'
 
 
+@app.route('/ingredients', methods=['GET'])
+def ingredients():
+    connection = sqlite3.connect("data.db")
+    connection.row_factory = dict_factory
+    cursor = connection.cursor()
+
+    query = "SELECT * FROM ingredients"
+    print(query)
+    result = cursor.execute(query).fetchall()
+
+    return json.dumps(result, indent=4) + '\n'
+
+
+@app.route('/pallets', methods=['POST'])
+def pallets():
+    connection = sqlite3.connect("data.db")
+    connection.row_factory = dict_factory
+    cursor = connection.cursor()
+
+    cookie = request.args.get('cookie')
+
+    query = """INSERT INTO pallets (production_date, blocked, cookie_name, order_id)
+    VALUES ( date('now'), 0, \"{}\", NULL )""".format(cookie)
+    print(query)
+    result = cursor.execute(query).fetchall()
+
+    return json.dumps(result, indent=4) + '\n'
+
+
 @app.route('/movies')
 def movies():
-    connection = sqlite3.connect("database.db")
+    connection = sqlite3.connect("data.db")
     connection.row_factory = dict_factory
     cursor = connection.cursor()
 

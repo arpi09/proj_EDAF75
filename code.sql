@@ -15,83 +15,82 @@ PRAGMA foreign_keys=ON;
 
 --------------------------------------------------------------
 CREATE TABLE pallets (
-Pallet_number                 INT,
-Production_date               DATE  NOT NULL,
-Production_time               TIME  NOT NULL,
+pallet_number                 INT   DEFAULT (lower(hex(randomblob(16)))),
+production_date               DATE  NOT NULL,
 blocked                       BIT   DEFAULT 0,
 
-Cookie_name                   TEXT  NOT NULL,
-Order_id                      INT   DEFAULT NULL,
+cookie_name                   TEXT  NOT NULL,
+order_id                      INT   DEFAULT NULL,
 
-PRIMARY KEY (Pallet_number),
-FOREIGN KEY (Cookie_name)     REFERENCES  cookies(Cookie_name),
-FOREIGN KEY (Order_id)        REFERENCES  orders(Order_id)
+PRIMARY KEY (pallet_number),
+FOREIGN KEY (cookie_name)     REFERENCES  cookies(cookie_name),
+FOREIGN KEY (order_id)        REFERENCES  orders(order_id)
 );
 
 
 --------------------------------------------------------------
 CREATE TABLE orders (
-Order_id                      INT,
-Date_to_be_delivered          DATE  NOT NULL,
-Delivered_status              BIT   NOT NULL,
+order_id                      INT   DEFAULT (lower(hex(randomblob(16)))),
+date_to_be_delivered          DATE  NOT NULL,
+delivered_status              BIT   NOT NULL,
 
-Customer_name                 TEXT  NOT NULL,
+customer_name                 TEXT  NOT NULL,
 
-PRIMARY KEY (Order_id),
-FOREIGN KEY (Customer_name)   REFERENCES  customers(Customer_name)
+PRIMARY KEY (order_id),
+FOREIGN KEY (customer_name)   REFERENCES  customers(customer_name)
 );
 
 
 --------------------------------------------------------------
 CREATE TABLE customers (
-Customer_name                 TEXT,
-Customer_address              TEXT  NOT NULL,
+customer_name                 TEXT,
+customer_address              TEXT  NOT NULL,
 
-PRIMARY KEY (Customer_name)
+PRIMARY KEY (customer_name)
 );
 
 
 --------------------------------------------------------------
 CREATE TABLE cookies (
-Cookie_name                   TEXT,
+cookie_name                   TEXT,
 
-PRIMARY KEY (Cookie_name)
+PRIMARY KEY (cookie_name)
 );
 
 
 --------------------------------------------------------------
 CREATE TABLE order_contents (
-Order_amount                  INT,
+order_amount                  INT,
 
-Order_id                      INT   NOT NULL,
-Cookie_name                   TEXT  NOT NULL,
+order_id                      INT   NOT NULL,
+cookie_name                   TEXT  NOT NULL,
 
-FOREIGN KEY (Order_id)        REFERENCES  orders(Order_id),
-FOREIGN KEY (Cookie_name)     REFERENCES  cookies(Cookie_name)
+FOREIGN KEY (order_id)        REFERENCES  orders(order_id),
+FOREIGN KEY (cookie_name)     REFERENCES  cookies(cookie_name)
 );
 
 
 --------------------------------------------------------------
 CREATE TABLE cookie_contents (
-Ingredient_amount             INT,
+ingredient_amount             INT,
 
-Cookie_name                   TEXT  NOT NULL,
-Ingredient_name               TEXT  NOT NULL,
+cookie_name                   TEXT  NOT NULL,
+ingredient_name               TEXT  NOT NULL,
 
-FOREIGN KEY (Cookie_name)     REFERENCES  cookies(Cookie_name),
-FOREIGN KEY (Ingredient_name) REFERENCES  ingredients(Ingredient_name)
+FOREIGN KEY (cookie_name)     REFERENCES  cookies(cookie_name),
+FOREIGN KEY (ingredient_name) REFERENCES  ingredients(ingredient_name)
 );
 
 
 --------------------------------------------------------------
 CREATE TABLE ingredients (
-Ingredient_name               TEXT,
-Unit                          TEXT,
-Storage_amount                INT   NOT NULL,
-Last_delivery_date            DATE,
-Last_delivery_amount          INT,
+ingredient_name               TEXT,
+unit                          TEXT,
+storage_amount                INT   NOT NULL,
+last_delivery_date            DATE,
+last_delivery_amount          INT,
 
-PRIMARY KEY (Ingredient_name)
+PRIMARY KEY (ingredient_name)
 );
 
 
