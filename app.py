@@ -213,6 +213,7 @@ def cookies():
     query = """
         select Cookie_name AS name
         from cookies
+        ORDER BY name
     """
     print(query)
     result = cursor.execute(query).fetchall()
