@@ -115,6 +115,18 @@ def reset():
 
         return 'OK' + '\n'
 
+@app.route('/customers')
+def customers ():
+    connection = sqlite3.connect("data.db")
+    connection.row_factory = dict_factory
+    cursor = connection.cursor()
+    query =     "SELECT * FROM customers"
+    print(query)
+    result = cursor.execute(query).fetchall()
+
+    return json.dumps(result, indent=4) + '\n'
+
+
 
 @app.route('/recipes')
 def recipes ():
@@ -125,6 +137,7 @@ def recipes ():
                     FROM cookie_contents
                     JOIN ingredients
                     USING(Ingredient_name)
+                    ORDER BY Cookie_name, Ingredient_name
                             """
     print(query)
     result = cursor.execute(query).fetchall()
@@ -157,14 +170,14 @@ def POST_pallets():
         INSERT INTO pallets (production_date, blocked, cookie_name, order_id)
             VALUES ( date('now'), 0, \"{}\", NULL )
     """.format(cookie)
-    
-    
+
+
     print(query)
     result = cursor.execute(query).fetchall()
-    
+
     connection.commit()
     connection.close()
-    
+
     return json.dumps(result, indent=4) + '\n'
 
 
@@ -185,9 +198,9 @@ def GET_pallets():
     print(result)
     connection.commit()
     connection.close()
-    
+
     return json.dumps(result, indent=4) + '\n'
-    
+
 
 
 
