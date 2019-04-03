@@ -130,29 +130,48 @@ def ingredients():
 
 
 @app.route('/pallets', methods=['POST'])
-def pallets():
+def POST_pallets():
     connection = sqlite3.connect("data.db")
     connection.row_factory = dict_factory
     cursor = connection.cursor()
 
     cookie = request.args.get('cookie')
 
-    query = """INSERT INTO pallets (production_date, blocked, cookie_name, order_id)
-    VALUES ( date('now'), 0, \"{}\", NULL )""".format(cookie)
+    query = """
+        INSERT INTO pallets (production_date, blocked, cookie_name, order_id)
+            VALUES ( date('now'), 0, \"{}\", NULL )
+    """.format(cookie)
+    
+    
     print(query)
     result = cursor.execute(query).fetchall()
-
+    
+    connection.commit()
+    connection.close()
+    
     return json.dumps(result, indent=4) + '\n'
 
 
-@app.route('/movies')
-def movies():
+@app.route('/pallets', methods=['GET'])
+def GET_pallets():
     connection = sqlite3.connect("data.db")
     connection.row_factory = dict_factory
     cursor = connection.cursor()
-
-    title = request.args.get('title')
-    year = request.args.get('year')
+    query = """
+    SELECT Pallet_number AS id,  Cookie_name AS cookie, Production_date AS productionDate,
+    Customer_name AS customer, blocked
+    FROM pallets
+    LEFT JOIN orders
+    USING(Order_id)
+    """
+    print(query)
+    result = cursor.execute(query).fetchall()
+    print(result)
+    connection.commit()
+    connection.close()
+    
+    return json.dumps(result, indent=4) + '\n'
+    
 
 
 
@@ -165,28 +184,6 @@ def cookies():
     query = """
         select Cookie_name AS name
         from cookies
-    """
-    print(query)
-    result = cursor.execute(query).fetchall()
-    print(result)
-    connection.commit()
-    connection.close()
-
-    return json.dumps(result, indent=4) + '\n'
-
-
-
-@app.route('/pallets', methods=['GET'])
-def pallets():
-    connection = sqlite3.connect("data.db")
-    connection.row_factory = dict_factory
-    cursor = connection.cursor()
-    query = """
-        SELECT Pallet_number AS id,  Cookie_name AS cookie, Production_date AS productionDate,
-        Customer_name AS customer, blocked
-        FROM pallets
-        JOIN orders
-            USING(Order_id)
     """
     print(query)
     result = cursor.execute(query).fetchall()
