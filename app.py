@@ -186,18 +186,40 @@ def GET_pallets():
     connection = sqlite3.connect("data.db")
     connection.row_factory = dict_factory
     cursor = connection.cursor()
-    query = """
-    SELECT Pallet_number AS id,  Cookie_name AS cookie, Production_date AS productionDate,
-    Customer_name AS customer, blocked
-    FROM pallets
-    LEFT JOIN orders
-    USING(Order_id)
-    """
-    print(query)
-    result = cursor.execute(query).fetchall()
-    print(result)
-    connection.commit()
-    connection.close()
+    if request.args.get('cookie'):
+        cookie = request.args.get('cookie')
+        blocked = request.args.get('blocked')
+        if request.args.get('after'):
+            date = request.args.get('after')
+        else:
+            date = request.args.get('before')
+
+        query = """
+        SELECT Pallet_number AS id,  Cookie_name AS cookie, Production_date AS productionDate,
+        Customer_name AS customer, blocked
+        FROM pallets
+        LEFT JOIN orders
+        USING(Order_id)
+        WHERE cookie=\"{}\" AND blocked={} AND production_date>\"{}\"
+        """.format(cookie, blocked, date)
+        print(query)
+        result = cursor.execute(query).fetchall()
+        print(result)
+        connection.commit()
+        connection.close()
+    else:
+        query = """
+        SELECT Pallet_number AS id,  Cookie_name AS cookie, Production_date AS productionDate,
+        Customer_name AS customer, blocked
+        FROM pallets
+        LEFT JOIN orders
+        USING(Order_id)
+        """
+        print(query)
+        result = cursor.execute(query).fetchall()
+        print(result)
+        connection.commit()
+        connection.close()
 
     return json.dumps(result, indent=4) + '\n'
 
