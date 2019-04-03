@@ -115,34 +115,17 @@ def reset():
         return 'OK' + '\n'
 
 
-@app.route('/movies')
+@app.route('/customers')
 def movies():
-    connection = sqlite3.connect("database.db")
+    connection = sqlite3.connect("data.db")
     connection.row_factory = dict_factory
     cursor = connection.cursor()
 
-    title = request.args.get('title')
-    year = request.args.get('year')
+    query = "SELECT * FROM customers "
+    print(query)
+    result = cursor.execute(query).fetchall()
 
-
-    if title is not None or year is not None:
-        print(title)
-        print(year)
-
-        query = "SELECT * FROM movie WHERE prodYear={} AND title=\"{}\"".format(year, title)
-        print(query)
-        result = cursor.execute(query).fetchall()
-
-    else:
-        print("asdasdasd")
-        query = """
-                    SELECT  *
-                    FROM    movie
-                """
-        result = cursor.execute(query).fetchall()
-
-    connection.commit()
-    connection.close()
+    
 
     return json.dumps(result, indent=4) + '\n'
 
