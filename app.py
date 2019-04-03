@@ -247,6 +247,23 @@ def cookies():
 
 
 
+@app.route('/block/<cookie-name>/<from-date>/<to-date>', methods=['POST'])
+def block(cookie-name, from-date, to-date):
+
+        connection = sqlite3.connect("data.db")
+        connection.row_factory = dict_factory
+        cursor = connection.cursor()
+
+        query = """
+                UPDATE pallets
+                SET blocked = 1
+                WHERE cookie_name = {} AND production_date BETWEEN {} AND {} """
+                .format(cookie-name, from-date, to-date)
+
+        result = cursor.execute(query).fetchall()
+
+        return json.dumps(result, indent=4) + '\n'
+
 
 
 def dict_factory(cursor, row):
