@@ -108,130 +108,31 @@ def reset():
                         ( 50,    'Berliner',    'Chocolate'             );
 
 
-            """.format(hash("dobido"),hash("whatsinaname"))
+            """
 
         insert_curs.executescript(query_insert)
 
         return 'OK' + '\n'
 
 
-@app.route('/movies')
-def movies():
-    connection = sqlite3.connect("database.db")
+@app.route('/cookies', methods=['GET'])
+def cookies():
+    connection = sqlite3.connect("data.db")
     connection.row_factory = dict_factory
     cursor = connection.cursor()
-
-    title = request.args.get('title')
-    year = request.args.get('year')
-
-
-    if title is not None or year is not None:
-        print(title)
-        print(year)
-
-        query = "SELECT * FROM movie WHERE prodYear={} AND title=\"{}\"".format(year, title)
-        print(query)
-        result = cursor.execute(query).fetchall()
-
-    else:
-        print("asdasdasd")
-        query = """
-                    SELECT  *
-                    FROM    movie
-                """
-        result = cursor.execute(query).fetchall()
-
+    query = """
+        select * 
+        from cookies
+    """
+    print(query)
+    result = cursor.execute(query).fetchall()
+    print(result)
     connection.commit()
     connection.close()
 
     return json.dumps(result, indent=4) + '\n'
 
 
-@app.route('/movies/<IMDBKey>')
-def imdbkey(IMDBKey):
-    connection = sqlite3.connect("database.db")
-    connection.row_factory = dict_factory
-    cursor = connection.cursor()
-
-    query = "SELECT * FROM movie WHERE IMDBKey=\"{}\"".format(IMDBKey)
-    print(query)
-    result = cursor.execute(query).fetchall()
-
-    return json.dumps(result, indent=4) + '\n'
-
-
-@app.route('/performances', methods=['POST', 'GET'])
-def add_screening():
-
-    if request.method == 'POST':
-        connection = sqlite3.connect("database.db")
-        connection.row_factory = dict_factory
-        cursor = connection.cursor()
-
-        startTime = request.args.get('time')
-        startDate = request.args.get('date')
-        movie_IMDBKey = request.args.get('imdb')
-        theater_name = request.args.get('theater')
-
-
-        print(startTime)
-        print(startDate)
-        print(movie_IMDBKey)
-        print(theater_name)
-        check_cursor_one = connection.cursor()
-        check_cursor_two = connection.cursor()
-
-        query_one = "SELECT * FROM theater WHERE name = '{}';".format(theater_name)
-        print(query_one)
-        result_one = check_cursor_one.execute(query_one).fetchall()
-        print("result =")
-        print(result_one)
-
-        query_two = "SELECT * FROM movie WHERE IMDBKey = '{}';".format(movie_IMDBKey)
-        print(query_two)
-        result_two = check_cursor_two.execute(query_two).fetchall()
-        print("result =")
-        print(result_two)
-
-        if result_one and result_two:
-            query = """ INSERT INTO screening (startTime,  startDate, movie_IMDBKey, theater_name)
-                        VALUES ('{}', '{}', '{}','{}');""".format(startTime, startDate, movie_IMDBKey, theater_name)
-            cursor.execute(query)
-            connection.commit()
-            insert_curs = connection.cursor()
-
-            query_insert = "SELECT performance_id FROM screening WHERE rowid=last_insert_rowid()"
-            print(query_insert)
-            result = insert_curs.execute(query_insert).fetchall()
-
-
-            connection.commit()
-            connection.close()
-
-            return json.dumps(result, indent=4) + '\n'
-        else:
-            return "Filmen eller bion finns inte.\n"
-
-
-
-    if request.method == 'GET':
-        connection = sqlite3.connect("database.db")
-        connection.row_factory = dict_factory
-        cursor = connection.cursor()
-        #create_cursor = connection.cursor()
-
-
-        # temp_table = """CREATE TABLE ticket_nbr (
-        #                 performance_id  TEXT,
-        #                 nbr_seats       INT,
-        #                 PRIMARY KEY (performance_id),
-        #                 FOREIGN KEY (performance_id) REFERENCES screening (performance_id)
-        # );
-        # """
-
-        #create_cursor.execute(temp_table)
-
-        #performance_query = ""
 
 
 
@@ -240,89 +141,6 @@ def add_screening():
 
 
 
-
-
-
-
-
-
-
-@app.route('/tickets', methods=['POST'])
-def add_tickets():
-    if request.method == 'POST':
-        connection = sqlite3.connect("database.db")
-        connection.row_factory = dict_factory
-        insert_cursor = connection.cursor()
-        pwd_cursor = connection.cursor()
-        ticket_cursor = connection.cursor()
-        performance_cursor = connection.cursor()
-
-        user = request.args.get('user')
-        performance = request.args.get('performance')
-        pwd = request.args.get('pwd')
-
-        performance_query = "SELECT * FROM screening WHERE performance_id = '{}'".format(performance)
-        performance_result = performance_cursor.execute(performance_query).fetchall()
-        print(performance_result)
-
-        if not performance_result:
-            return "Error!"
-
-
-        pwd_hash = hash(pwd)
-        print(pwd_hash)
-
-        pwd_query = "SELECT password FROM customer WHERE userName = '{}' AND password = '{}'".format(user, pwd_hash)
-        print(pwd_query)
-
-        pwd_result = pwd_cursor.execute(pwd_query).fetchall()
-
-        if not pwd_result:
-            return "Wrong password!\n"
-
-
-
-
-        nbr_seats_left = nbr_seats(performance)
-        print(nbr_seats_left)
-        if nbr_seats_left < 1:
-            return "There are no available seats!"
-
-
-        insert_query = "INSERT INTO ticket (customer_name, performance_id) VALUES ('{}', '{}');".format(user, performance)
-        print(insert_query)
-        insert_cursor.execute(insert_query)
-        connection.commit()
-
-        ticket_query = "SELECT ti_id FROM ticket WHERE rowid=last_insert_rowid()"
-        ticket_result = ticket_cursor.execute(ticket_query).fetchall()
-        print("ASIDJAIOSDJASOIDJ")
-        print(ticket_result)
-
-
-        return "/tickets/" + ticket_result[0]['ti_id'] + '\n'
-
-
-
-@app.route('/customers/<customer_id>/tickets', methods=['GET'])
-def get_customer_ticket(customer_id):
-    if request.method == 'GET':
-        connection = sqlite3.connect("database.db")
-        connection.row_factory = dict_factory
-        cursor = connection.cursor()
-
-        query = """SELECT startDate AS date, startTime, theater_name AS theater, title, prodYear AS year, count() AS nbrOfTickets
-                        FROM ticket
-                        JOIN screening
-                        USING(performance_id)
-                        JOIN movie
-                        ON screening.movie_IMDBKey = movie.IMDBKey
-                        WHERE customer_name = '{}'
-                        GROUP BY performance_id""".format(customer_id)
-
-        result = cursor.execute(query).fetchall()
-
-        return json.dumps(result, indent=4) + '\n'
 
 def dict_factory(cursor, row):
     d = {}
