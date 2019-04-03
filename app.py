@@ -116,6 +116,22 @@ def reset():
         return 'OK' + '\n'
 
 
+@app.route('/recipes')
+def recipes ():
+    connection = sqlite3.connect("data.db")
+    connection.row_factory = dict_factory
+    cursor = connection.cursor()
+    query =     """SELECT Cookie_name, Ingredient_name, Ingredient_amount, Unit
+                    FROM cookie_contents
+                    JOIN ingredients
+                    USING(Ingredient_name)
+                            """
+    print(query)
+    result = cursor.execute(query).fetchall()
+
+    return json.dumps(result, indent=4) + '\n'
+
+
 @app.route('/ingredients', methods=['GET'])
 def ingredients():
     connection = sqlite3.connect("data.db")
