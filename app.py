@@ -16,16 +16,18 @@ def asdsa():
 @app.route('/reset', methods=['POST'])
 def reset():
     if request.method == 'POST':
-        connection = sqlite3.connect("database.db")
+        connection = sqlite3.connect("data.db")
 
         del_curs = connection.cursor()
 
         query_delete = """
-                    DELETE FROM theater;
-                    DELETE FROM movie;
-                    DELETE FROM screening;
-                    DELETE FROM ticket;
-                    DELETE FROM customer;
+                    DELETE FROM pallets;
+                    DELETE FROM orders;
+                    DELETE FROM customers;
+                    DELETE FROM cookies;
+                    DELETE FROM order_contents;
+                    DELETE FROM cookie_contents;
+                    DELETE FROM ingredients;
                 """
         del_curs.executescript(query_delete)
 
@@ -33,30 +35,80 @@ def reset():
         insert_curs = connection.cursor()
 
         query_insert = """
-                    INSERT INTO customer (userName, fullName, password)
-                    VALUES ('alice', 'Alice', '{}'),
-                           ('bob', 'Bob', '{}');
+                INSERT INTO customers (Customer_name, Customer_address)
+                VALUES ( 'Finkakor AB',   'Helsingborg'  ),
+                       ( 'Småbröd AB',    'Malmö'        ),
+                       ( 'Kaffebröd AB',  'Landskrona'   ),
+                       ( 'Bjudkakor AB',  'Ystad'        ),
+                       ( 'Kalaskakor AB', 'Trelleborg'   ),
+                       ( 'Partykakor AB', 'Kristianstad' ),
+                       ( 'Gästkakor AB',  'Hässleholm'   ),
+                       ( 'Skånekakor AB', 'Perstorp'     );
 
-                    INSERT INTO movie (title, prodYear, IMDBKey)
-                    VALUES ('The Shape of Water', 2007, 'tt5580390'),
-                            ('Moonlight', 2016, 'tt4975722'),
-                            ('Spotlight', 2015, 'tt1895587'),
-                            ('Birdman', 2014, 'tt2562232');
+                INSERT INTO cookies (Cookie_name)
+                VALUES  ( 'Nut ring'      ),
+                        ( 'Nut cookie'    ),
+                        ( 'Amneris'       ),
+                        ( 'Tango'         ),
+                        ( 'Almond delight'),
+                        ( 'Berliner'      );
 
-                    INSERT INTO theater (name, capacity)
-                    VALUES ('Kino', 10),
-                            ('Södran', 16),
-                            ('Skandia', 100);
+               INSERT INTO ingredients ( Ingredient_name, Unit , Storage_amount, Last_delivery_date, Last_delivery_amount)
+               VALUES   ( 'Flour',                 'g',     100000,    date('now'),   100000),
+                        ( 'Butter',                'g',     100000,    date('now'),   100000),
+                        ( 'Icing sugar',           'g',     100000,    date('now'),   100000),
+                        ( 'Roasted, chopped nuts', 'g',     100000,    date('now'),   100000),
+                        ( 'Fine-ground nuts',      'g',     100000,    date('now'),   100000),
+                        ( 'Ground, roasted nuts',  'g',     100000,    date('now'),   100000),
+                        ( 'Bread crumbs',          'g',     100000,    date('now'),   100000),
+                        ( 'Sugar',                 'g',     100000,    date('now'),   100000),
+                        ( 'Egg whites',            'ml',    100000,    date('now'),   100000),
+                        ( 'Chocolate',             'g',     100000,    date('now'),   100000),
+                        ( 'Marzipan',              'g',     100000,    date('now'),   100000),
+                        ( 'Eggs',                  'g',     100000,    date('now'),   100000),
+                        ( 'Potato starch',         'g',     100000,    date('now'),   100000),
+                        ( 'Wheat flour',           'g',     100000,    date('now'),   100000),
+                        ( 'Sodium bicarbonate',    'g',     100000,    date('now'),   100000),
+                        ( 'Vanilla',               'g',     100000,    date('now'),   100000),
+                        ( 'Chopped almonds',       'g',     100000,    date('now'),   100000),
+                        ( 'Cinnamon',              'g',     100000,    date('now'),   100000),
+                        ( 'Vanilla sugar',         'g',     100000,    date('now'),   100000);
 
-                    INSERT INTO screening (startTime, startDate, movie_IMDBKey, theater_name)
-                    VALUES ('10:00', '2019–02-10', 'tt4975722', 'Kino'),
-                     ('13:00', '2019–02-10', 'tt1895587', 'Kino'),
-                    ('10:00', '2019–02-10', 'tt2562232', 'Kino'),
-                     ('10:00', '2019–02-10', 'tt1895587', 'Södran'),
-                    ('10:00', '2019–02-10', 'tt1895587', 'Skandia');
+               INSERT INTO cookie_contents ( Ingredient_amount, Cookie_name, Ingredient_name)
+               VALUES   ( 450,   'Nut ring',    'Flour'                 ),
+                        ( 450,   'Nut ring',    'Butter'                ),
+                        ( 190,   'Nut ring',    'Icing sugar'           ),
+                        ( 225,   'Nut ring',    'Roasted, chopped nuts' ),
+                        ( 750,   'Nut cookie',  'Fine-ground nuts'      ),
+                        ( 625,   'Nut cookie',  'Ground, roasted nuts'  ),
+                        ( 125,   'Nut cookie',  'Bread crumbs'          ),
+                        ( 375,   'Nut cookie',  'Sugar'                 ),
+                        ( 350,   'Nut cookie',  'Egg whites'            ),
+                        ( 50,    'Nut cookie',  'Chocolate'             ),
+                        ( 750,   'Amneris',     'Marzipan'              ),
+                        ( 250,   'Amneris',     'Butter'                ),
+                        ( 250,   'Amneris',     'Eggs'                  ),
+                        ( 25,    'Amneris',     'Potato starch'         ),
+                        ( 25,    'Amneris',     'Wheat flour'           ),
+                        ( 200,   'Tango',       'Butter'                ),
+                        ( 250,   'Tango',       'Sugar'                 ),
+                        ( 300,   'Tango',       'Flour'                 ),
+                        ( 4,     'Tango',       'Sodium bicarbonate'    ),
+                        ( 2,     'Tango',       'Vanilla'               ),
+                        ( 400,   'Almond',      'Butter'                ),
+                        ( 270,   'Almond',      'Sugar'                 ),
+                        ( 279,   'Almond',      'Chopped almonds'       ),
+                        ( 400,   'Almond',      'Flour'                 ),
+                        ( 10,    'Almond',      'Cinnamon'              ),
+                        ( 350,   'Berliner',    'Flour'                 ),
+                        ( 250,   'Berliner',    'Butter'                ),
+                        ( 100,   'Berliner',    'Icing sugar'           ),
+                        ( 50,    'Berliner',    'Eggs'                  ),
+                        ( 5,     'Berliner',    'Vanilla sugar'         ),
+                        ( 50,    'Berliner',    'Chocolate'             );
 
 
-                """.format(hash("dobido"),hash("whatsinaname"))
+            """.format(hash("dobido"),hash("whatsinaname"))
 
         insert_curs.executescript(query_insert)
 
@@ -181,59 +233,17 @@ def add_screening():
 
         #performance_query = ""
 
-        
 
 
-        query = """
-                    SELECT  performance_id, startDate, startTime, title, prodYear, name, ABS(capacity - count() ) AS capacity
-                    FROM ticket
-                    LEFT JOIN    screening
-                    USING (performance_id)
-                    LEFT JOIN    theater
-                    ON      theater.name = screening.theater_name
-                    LEFT JOIN   movie
-                    ON      screening.movie_IMDBKey = movie.IMDBKey
-        
-                    GROUP BY performance_id
-                """ query = """
-                             CREATE VIEW AAA AS
-                             SELECT  performance_id, ABS(capacity - count()) AS nbr_left
-                             FROM ticket
-                             JOIN screening
-                             USING(performance_id)
-                             JOIN movie
-                             ON screening.movie_IMDBKey = movie.IMDBKey
-                             GROUP BY performance_id
-                        """
-                    
-                    
-                    
-                result = cursor.execute(query).fetchall()
 
 
-                query = """
-                            SELECT  performance_id, startDate, startTime, title, prodYear, name, nbr_left
-                            FROM    screening
-                            LEFT JOIN    theater
-                            ON      theater.name = screening.theater_name
-                            LEFT JOIN   movie
-                            ON      screening.movie_IMDBKey = movie.IMDBKey
-                            JOIN AAA
-                            USING(performance_id) 
-                            GROUP BY performance_id
-                        """
-                         
-                         
-                DROP VIEW AAA;
-    
-    
-        
-    
-        print(query)
-        result = cursor.execute(query).fetchall()
-        print (result)
 
-        return json.dumps(result, indent=4) + '\n'
+
+
+
+
+
+
 
 
 
