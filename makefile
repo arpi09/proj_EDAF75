@@ -3,39 +3,39 @@ server:
 
 # // implemented
 reset:
-	curl -X POST http://127.0.0.1:5000/reset
+	curl -X POST http://127.0.0.1:8888/reset
 
 cookies:
-	curl -X GET http://127.0.0.1:5000/cookies
+	curl -X GET http://127.0.0.1:8888/cookies
 
 Berliner:
-	curl -X POST http://127.0.0.1:5000/pallets\?cookie\=Berliner
+	curl -X POST http://127.0.0.1:8888/pallets\?cookie\=Berliner
 
 pallets:
-	curl -X GET http://127.0.0.1:5000/pallets
+	curl -X GET http://127.0.0.1:8888/pallets
 
 specific_pallet:
-	curl -X GET http://localhost:5000/pallets\?cookie\=Berliner\&blocked\=0\&after\=2020-03-03
+	curl -X GET http://localhost:8888/pallets\?cookie\=Berliner\&blocked\=0\&after\=2020-03-03
 
 recipes:
-	curl -X GET http://127.0.0.1:5000/recipes
+	curl -X GET http://127.0.0.1:8888/recipes
 
 ingredients:
-	curl -X GET http://127.0.0.1:5000/ingredients
+	curl -X GET http://127.0.0.1:8888/ingredients
 
 
 
 
 Nut_ring:
-	curl -X POST http://127.0.0.1:5000/pallets\?cookie\=Nut+ring
+	curl -X POST http://127.0.0.1:8888/pallets\?cookie\=Nut+ring
 Nut_cookie:
-	curl -X POST http://127.0.0.1:5000/pallets\?cookie\=Nut+cookie
+	curl -X POST http://127.0.0.1:8888/pallets\?cookie\=Nut+cookie
 Amneris:
-	curl -X POST http://127.0.0.1:5000/pallets\?cookie\=Amneris
+	curl -X POST http://127.0.0.1:8888/pallets\?cookie\=Amneris
 Tango:
-	curl -X POST http://127.0.0.1:5000/pallets\?cookie\=Tango
+	curl -X POST http://127.0.0.1:8888/pallets\?cookie\=Tango
 Almond_delight:
-	curl -X POST http://127.0.0.1:5000/pallets\?cookie\=Almond+delight
+	curl -X POST http://127.0.0.1:8888/pallets\?cookie\=Almond+delight
 
 
 
@@ -43,13 +43,13 @@ Almond_delight:
 # // to do
 
 customers:
-	curl -X GET http://127.0.0.1:5000/customers
+	curl -X GET http://127.0.0.1:8888/customers
 
 
 
 test:
 	make reset
-	curl -X POST http://127.0.0.1:5000/pallets\?cookie\=Berliner
+	curl -X POST http://127.0.0.1:8888/pallets\?cookie\=Berliner
 
 create_db:
 	sqlite3 data.db < code.sql

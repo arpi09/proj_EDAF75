@@ -247,8 +247,8 @@ def cookies():
 
 
 
-@app.route('/block/<cookie-name>/<from-date>/<to-date>', methods=['POST'])
-def block(cookie-name, from-date, to-date):
+@app.route('/block/<cookie_name>/<from_date>/<to_date>', methods=['POST'])
+def block(cookie_name, from_date, to_date):
 
         connection = sqlite3.connect("data.db")
         connection.row_factory = dict_factory
@@ -257,13 +257,36 @@ def block(cookie-name, from-date, to-date):
         query = """
                 UPDATE pallets
                 SET blocked = 1
-                WHERE cookie_name = {} AND production_date BETWEEN {} AND {} """
-                .format(cookie-name, from-date, to-date)
+                WHERE cookie_name = \"{}\" AND production_date BETWEEN \"{}\" AND \"{}\" """.format(cookie_name, from_date, to_date)
 
+
+        print(query)
         result = cursor.execute(query).fetchall()
+        connection.commit()
+        connection.close()
 
         return json.dumps(result, indent=4) + '\n'
 
+
+@app.route('/unblock/<cookie_name>/<from_date>/<to_date>', methods=['POST'])
+def unblock(cookie_name, from_date, to_date):
+
+        connection = sqlite3.connect("data.db")
+        connection.row_factory = dict_factory
+        cursor = connection.cursor()
+
+        query = """
+                UPDATE pallets
+                SET blocked = 0
+                WHERE cookie_name = \"{}\" AND production_date BETWEEN \"{}\" AND \"{}\" """.format(cookie_name, from_date, to_date)
+
+
+        print(query)
+        result = cursor.execute(query).fetchall()
+        connection.commit()
+        connection.close()
+
+        return json.dumps(result, indent=4) + '\n'
 
 
 def dict_factory(cursor, row):
@@ -299,4 +322,4 @@ def nbr_seats(performance_id):
     return result[0][0]
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=8888)
