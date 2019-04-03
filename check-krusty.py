@@ -62,9 +62,12 @@ def check_cookies(expected):
         resource = url('/cookies')
         print(f'Trying curl -X GET {resource}')
         r = requests.get(resource)
-        # print(format_response(r))
+        print(format_response(r))
+        print("asdasdasda")
         found = response_to_dict(r)['cookies']
+        print(found)
         cookies = set(d['name'] for d in found)
+        print(cookies)
         if cookies != expected:
             abort(f"Expected {expected}, found {cookies}")
         else:

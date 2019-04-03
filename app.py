@@ -120,9 +120,13 @@ def customers ():
     connection = sqlite3.connect("data.db")
     connection.row_factory = dict_factory
     cursor = connection.cursor()
-    query =     "SELECT * FROM customers"
+    query =     "SELECT customer_name as name, customer_address as address FROM customers"
     print(query)
     result = cursor.execute(query).fetchall()
+
+    result = {"customers": result}
+
+    print(json.dumps(result, indent=4) + '\n')
 
     return json.dumps(result, indent=4) + '\n'
 
@@ -154,6 +158,8 @@ def ingredients():
     query = "SELECT * FROM ingredients"
     print(query)
     result = cursor.execute(query).fetchall()
+
+    result = {"ingredients": result}
 
     return json.dumps(result, indent=4) + '\n'
 
@@ -224,26 +230,24 @@ def GET_pallets():
     return json.dumps(result, indent=4) + '\n'
 
 
-
-
-
 @app.route('/cookies', methods=['GET'])
 def cookies():
     connection = sqlite3.connect("data.db")
     connection.row_factory = dict_factory
     cursor = connection.cursor()
     query = """
-        select Cookie_name AS name
+        select cookie_name AS name
         from cookies
         ORDER BY name
     """
     print(query)
     result = cursor.execute(query).fetchall()
-    print(result)
     connection.commit()
     connection.close()
 
-    return json.dumps(result, indent=4) + '\n'
+    result = {"cookies": result}
+
+    return (json.dumps(result, indent=4) + '\n')
 
 
 
