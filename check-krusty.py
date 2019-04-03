@@ -85,7 +85,7 @@ def check_customers(expected):
                 abort(f"GET {resource} put {customer} in {d[customer]['address']}, it should have been {address}")
     except Exception as e:
         abort(f"Error in GET /customers: {e}")
-    
+
 
 def check_ingredients(expected):
     try:

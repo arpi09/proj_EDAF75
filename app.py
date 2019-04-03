@@ -113,7 +113,7 @@ def reset():
 
         insert_curs.executescript(query_insert)
 
-        return 'OK' + '\n'
+        return json.dumps({"status": "ok"})
 
 @app.route('/customers')
 def customers ():
