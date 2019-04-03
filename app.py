@@ -155,7 +155,9 @@ def ingredients():
     connection.row_factory = dict_factory
     cursor = connection.cursor()
 
-    query = "SELECT * FROM ingredients"
+    query = "SELECT ingredient_name AS name, storage_amount AS quantity, unit FROM ingredients"
+    
+    
     print(query)
     result = cursor.execute(query).fetchall()
 
@@ -171,16 +173,62 @@ def POST_pallets():
     cursor = connection.cursor()
 
     cookie = request.args.get('cookie')
+    
+    
+    test1 = """
+        SELECT cookie_name
+        FROM pallets
+        WHERE cookie_name =  \"{}\"
+    """.format(cookie)
+
+    test1_result = cursor.execute(test1).fetchall()
+    
+    print(json.dumps(test1_result, indent=4) + '\n')
+    if not test1_result:
+        return {"status":"no such cookie"}
+
+
+# test ingredients
+    # test2 = """
+    # 
+    #     SELECT name, available, cost
+    #     FROM
+    # 
+    #         (SELECT ingredient_name AS name, ingredient_amount AS cost
+    #         FROM cookie_contents
+    #         WHERE cookie_name =  \"{}\")
+    # 
+    #     JOIN
+    # 
+    #         (SELECT ingredient_name AS name, storage_amount AS available
+    #         FROM ingredients
+    #         WHERE cookie_name =  \"{}\")
+    # 
+    #     USING(name)
+    # 
+    # WHERE (54 * cost) > available
+    # 
+    # """.format(cookie, cookie)
+    # 
+    # test2_result = cursor.execute(test2).fetchall()
+    # print(json.dumps(test2_result, indent=4) + '\n')
+    # if not test2_result:
+    #     return {"status":"not enough ingredients"}
+
 
     query = """
         INSERT INTO pallets (production_date, blocked, cookie_name, order_id)
             VALUES ( date('now'), 0, \"{}\", NULL )
     """.format(cookie)
-
-
     print(query)
+    
+    
+    
+    # format output  perhaps use SELECT LAST_INSERT_ID();
+    
+    
     result = cursor.execute(query).fetchall()
-
+    result = {"status": result}
     connection.commit()
     connection.close()
 
@@ -226,7 +274,9 @@ def GET_pallets():
         print(result)
         connection.commit()
         connection.close()
-
+        
+        
+    result = {"pallets": result}
     return json.dumps(result, indent=4) + '\n'
 
 
