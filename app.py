@@ -264,6 +264,14 @@ def GET_pallets():
         else:
             date = request.args.get('before')
 
+        # query = """
+        #     SELECT Pallet_number AS id,  Cookie_name AS cookie, Production_date AS productionDate,
+        #     Customer_name AS customer, CASE WHEN blocked = 0 THEN 'false' ELSE 'true' END AS blocked
+        #     FROM pallets
+        #     LEFT JOIN orders
+        #         USING(Order_id)
+        #     WHERE cookie=? AND blocked={} AND production_date>?
+        # """
         query = """
             SELECT Pallet_number AS id,  Cookie_name AS cookie, Production_date AS productionDate,
             Customer_name AS customer, blocked
