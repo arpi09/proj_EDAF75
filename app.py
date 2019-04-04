@@ -120,14 +120,15 @@ def customers ():
     connection = sqlite3.connect("data.db")
     connection.row_factory = dict_factory
     cursor = connection.cursor()
-    query =     "SELECT customer_name as name, customer_address as address FROM customers"
-    # print(query)
+    
+    query =     """
+        SELECT customer_name as name, customer_address as address 
+        FROM customers
+    """
+    
     result = cursor.execute(query).fetchall()
-
     result = {"customers": result}
-
     # print(json.dumps(result, indent=4) + '\n')
-
     return json.dumps(result, indent=4) + '\n'
 
 
@@ -137,15 +138,17 @@ def recipes ():
     connection = sqlite3.connect("data.db")
     connection.row_factory = dict_factory
     cursor = connection.cursor()
-    query =     """SELECT Cookie_name, Ingredient_name, Ingredient_amount, Unit
-                    FROM cookie_contents
-                    JOIN ingredients
-                    USING(Ingredient_name)
-                    ORDER BY Cookie_name, Ingredient_name
-                            """
-    # print(query)
+    
+    query =     """
+        SELECT Cookie_name, Ingredient_name, Ingredient_amount, Unit
+        FROM cookie_contents
+        JOIN ingredients
+        USING(Ingredient_name)
+        ORDER BY Cookie_name, Ingredient_name
+    """
+    
     result = cursor.execute(query).fetchall()
-
+    result = {"recipes": result}
     return json.dumps(result, indent=4) + '\n'
 
 
@@ -155,14 +158,13 @@ def ingredients():
     connection.row_factory = dict_factory
     cursor = connection.cursor()
 
-    query = "SELECT ingredient_name AS name, storage_amount AS quantity, unit FROM ingredients"
+    query = """
+        SELECT ingredient_name AS name, storage_amount AS quantity, unit 
+        FROM ingredients
+    """
 
-
-    # print(query)
     result = cursor.execute(query).fetchall()
-
     result = {"ingredients": result}
-
     return json.dumps(result, indent=4) + '\n'
 
 
@@ -174,7 +176,6 @@ def POST_pallets():
 
     cookie = request.args.get('cookie')
 
-
     test1 = """
         SELECT cookie_name
         FROM cookies
@@ -184,13 +185,9 @@ def POST_pallets():
     test1_result = cursor.execute(test1).fetchall()
     # print(test1_result)
     if not test1_result:
-        # print("klajdaiosdjaiosdnhasiodhasoihdasuid")
         return json.dumps({"status":"no such cookie"})
 
-
-# test ingredients
     test2 = """
-
         SELECT name, available, cost
         FROM
 
@@ -209,71 +206,47 @@ def POST_pallets():
         USING(name)
 
     WHERE ((54 * cost) > available) OR (available is NULL)
-
     """.format(cookie, cookie)
 
     test2_result = cursor.execute(test2).fetchall()
-    # print(json.dumps(test2_result, indent=4) + '\n')
     if  test2_result:
         return json.dumps({"status":"not enough ingredients"})
+    
+    cursor = connection.cursor()
 
+    query_two = """SELECT ingredient_name, ingredient_amount
+    FROM cookie_contents
+    WHERE cookie_name = \"{}\"""".format(cookie)
 
-
-
-
-
-    # format output  perhaps use SELECT LAST_INSERT_ID();
-
-
-    else:
-        # print("maap")
-        cursor = connection.cursor()
-
-
-        query_two = """SELECT ingredient_name, ingredient_amount
-        FROM cookie_contents
-        WHERE cookie_name = \"{}\"""".format(cookie)
-
-        result2 = cursor.execute(query_two).fetchall()
-        for item in result2:
-            query_three = """
+    result2 = cursor.execute(query_two).fetchall()
+    for item in result2:
+        query_three = """
             UPDATE ingredients
             SET storage_amount = storage_amount - {}*54
             WHERE ingredient_name = \"{}\"
-            """.format(item['ingredient_amount'], item['ingredient_name'])
-            cursor.execute(query_three)
+        """.format(item['ingredient_amount'], item['ingredient_name'])
+        
+        cursor.execute(query_three)
 
 
-        query = """
-        INSERT INTO pallets (production_date, blocked, cookie_name, order_id)
+    query = """
+    INSERT INTO pallets (production_date, blocked, cookie_name, order_id)
         VALUES ( date('now'), 0, \"{}\", NULL )
-        """.format(cookie)
-        cursor.execute(query)
+    """.format(cookie)
+    cursor.execute(query)
 
+    queryid = """
+            SELECT pallet_number
+            FROM pallets
+            WHERE rowid = last_insert_rowid()
+    """
 
-        queryid = """
-                SELECT pallet_number
-                FROM pallets
-                WHERE rowid = last_insert_rowid()
-                """
-
-        result = cursor.execute(queryid).fetchall()
-        # print(result)
-
-
-        connection.commit()
-        data = {"status": "ok", "id": ""}
-        data["id"] = result[0]['pallet_number']
-        connection.close()
-        # print(data)
-        return json.dumps(data)
-
-
-    # result = cursor.execute(query).fetchall()
-    # result = {"status": result}
-    # connection.commit()
-    # connection.close()
-    #
+    result = cursor.execute(queryid).fetchall()
+    connection.commit()
+    ans = {"status": "ok", "id": ""}
+    ans["id"] = result[0]['pallet_number']
+    connection.close()
+    return json.dumps(ans)
 
 
 @app.route('/pallets', methods=['GET'])
@@ -281,6 +254,7 @@ def GET_pallets():
     connection = sqlite3.connect("data.db")
     connection.row_factory = dict_factory
     cursor = connection.cursor()
+    
     if request.args.get('cookie'):
         cookie = request.args.get('cookie')
         blocked = request.args.get('blocked')
@@ -290,32 +264,29 @@ def GET_pallets():
             date = request.args.get('before')
 
         query = """
-        SELECT Pallet_number AS id,  Cookie_name AS cookie, Production_date AS productionDate,
-        Customer_name AS customer, blocked
-        FROM pallets
-        LEFT JOIN orders
-        USING(Order_id)
-        WHERE cookie=\"{}\" AND blocked={} AND production_date>\"{}\"
+            SELECT Pallet_number AS id,  Cookie_name AS cookie, Production_date AS productionDate,
+            Customer_name AS customer, blocked
+            FROM pallets
+            LEFT JOIN orders
+                USING(Order_id)
+            WHERE cookie=\"{}\" AND blocked={} AND production_date>\"{}\"
         """.format(cookie, blocked, date)
-        # print(query)
+        
         result = cursor.execute(query).fetchall()
-        # print(result)
         connection.commit()
         connection.close()
     else:
         query = """
-        SELECT Pallet_number AS id,  Cookie_name AS cookie, Production_date AS productionDate,
-        Customer_name AS customer, blocked
-        FROM pallets
-        LEFT JOIN orders
-        USING(Order_id)
+            SELECT Pallet_number AS id,  Cookie_name AS cookie, Production_date AS productionDate,
+            Customer_name AS customer, blocked
+            FROM pallets
+            LEFT JOIN orders
+                USING(Order_id)
         """
-        # print(query)
+        
         result = cursor.execute(query).fetchall()
-        # print(result)
         connection.commit()
         connection.close()
-
 
     result = {"pallets": result}
     return json.dumps(result, indent=4) + '\n'
@@ -326,25 +297,22 @@ def cookies():
     connection = sqlite3.connect("data.db")
     connection.row_factory = dict_factory
     cursor = connection.cursor()
+    
     query = """
-        select cookie_name AS name
-        from cookies
+        SELECT cookie_name AS name
+        FROM cookies
         ORDER BY name
     """
-    # print(query)
+    
     result = cursor.execute(query).fetchall()
     connection.commit()
     connection.close()
-
     result = {"cookies": result}
-
     return (json.dumps(result, indent=4) + '\n')
-
 
 
 @app.route('/block/<cookie_name>/<from_date>/<to_date>', methods=['POST'])
 def block(cookie_name, from_date, to_date):
-
         connection = sqlite3.connect("data.db")
         connection.row_factory = dict_factory
         cursor = connection.cursor()
@@ -352,14 +320,12 @@ def block(cookie_name, from_date, to_date):
         query = """
                 UPDATE pallets
                 SET blocked = 1
-                WHERE cookie_name = \"{}\" AND production_date BETWEEN \"{}\" AND \"{}\" """.format(cookie_name, from_date, to_date)
+                WHERE cookie_name = \"{}\" AND production_date BETWEEN \"{}\" AND \"{}\" 
+        """.format(cookie_name, from_date, to_date)
 
-
-        # print(query)
         result = cursor.execute(query).fetchall()
         connection.commit()
         connection.close()
-
         return json.dumps(result, indent=4) + '\n'
 
 
@@ -373,7 +339,8 @@ def unblock(cookie_name, from_date, to_date):
         query = """
                 UPDATE pallets
                 SET blocked = 0
-                WHERE cookie_name = \"{}\" AND production_date BETWEEN \"{}\" AND \"{}\" """.format(cookie_name, from_date, to_date)
+                WHERE cookie_name = \"{}\" AND production_date BETWEEN \"{}\" AND \"{}\" 
+        """.format(cookie_name, from_date, to_date)
 
 
         # print(query)
@@ -381,7 +348,8 @@ def unblock(cookie_name, from_date, to_date):
         connection.commit()
         connection.close()
 
-        return json.dumps(result, indent=4) + '\n'
+        return json.dumps({"status": "ok"})
+        # return json.dumps(result, indent=4) + '\n'
 
 
 def dict_factory(cursor, row):
