@@ -121,12 +121,12 @@ def customers ():
     connection.row_factory = dict_factory
     cursor = connection.cursor()
     query =     "SELECT customer_name as name, customer_address as address FROM customers"
-    print(query)
+    # print(query)
     result = cursor.execute(query).fetchall()
 
     result = {"customers": result}
 
-    print(json.dumps(result, indent=4) + '\n')
+    # print(json.dumps(result, indent=4) + '\n')
 
     return json.dumps(result, indent=4) + '\n'
 
@@ -143,7 +143,7 @@ def recipes ():
                     USING(Ingredient_name)
                     ORDER BY Cookie_name, Ingredient_name
                             """
-    print(query)
+    # print(query)
     result = cursor.execute(query).fetchall()
 
     return json.dumps(result, indent=4) + '\n'
@@ -158,7 +158,7 @@ def ingredients():
     query = "SELECT ingredient_name AS name, storage_amount AS quantity, unit FROM ingredients"
 
 
-    print(query)
+    # print(query)
     result = cursor.execute(query).fetchall()
 
     result = {"ingredients": result}
@@ -182,9 +182,9 @@ def POST_pallets():
     """.format(cookie)
 
     test1_result = cursor.execute(test1).fetchall()
-    print(test1_result)
+    # print(test1_result)
     if not test1_result:
-        print("klajdaiosdjaiosdnhasiodhasoihdasuid")
+        # print("klajdaiosdjaiosdnhasiodhasoihdasuid")
         return json.dumps({"status":"no such cookie"})
 
 
@@ -213,11 +213,8 @@ def POST_pallets():
     """.format(cookie, cookie)
 
     test2_result = cursor.execute(test2).fetchall()
-    print("a1")
-    print(json.dumps(test2_result, indent=4) + '\n')
-    print("a2")
+    # print(json.dumps(test2_result, indent=4) + '\n')
     if  test2_result:
-        print("a3")
         return json.dumps({"status":"not enough ingredients"})
 
 
@@ -229,7 +226,7 @@ def POST_pallets():
 
 
     else:
-        print("opkopkiofhofhjiofghjfioh")
+        # print("maap")
         cursor = connection.cursor()
 
 
@@ -261,14 +258,14 @@ def POST_pallets():
                 """
 
         result = cursor.execute(queryid).fetchall()
-        print(result)
+        # print(result)
 
 
         connection.commit()
         data = {"status": "ok", "id": ""}
         data["id"] = result[0]['pallet_number']
         connection.close()
-        print(data)
+        # print(data)
         return json.dumps(data)
 
 
@@ -300,9 +297,9 @@ def GET_pallets():
         USING(Order_id)
         WHERE cookie=\"{}\" AND blocked={} AND production_date>\"{}\"
         """.format(cookie, blocked, date)
-        print(query)
+        # print(query)
         result = cursor.execute(query).fetchall()
-        print(result)
+        # print(result)
         connection.commit()
         connection.close()
     else:
@@ -313,9 +310,9 @@ def GET_pallets():
         LEFT JOIN orders
         USING(Order_id)
         """
-        print(query)
+        # print(query)
         result = cursor.execute(query).fetchall()
-        print(result)
+        # print(result)
         connection.commit()
         connection.close()
 
@@ -334,7 +331,7 @@ def cookies():
         from cookies
         ORDER BY name
     """
-    print(query)
+    # print(query)
     result = cursor.execute(query).fetchall()
     connection.commit()
     connection.close()
@@ -358,7 +355,7 @@ def block(cookie_name, from_date, to_date):
                 WHERE cookie_name = \"{}\" AND production_date BETWEEN \"{}\" AND \"{}\" """.format(cookie_name, from_date, to_date)
 
 
-        print(query)
+        # print(query)
         result = cursor.execute(query).fetchall()
         connection.commit()
         connection.close()
@@ -379,7 +376,7 @@ def unblock(cookie_name, from_date, to_date):
                 WHERE cookie_name = \"{}\" AND production_date BETWEEN \"{}\" AND \"{}\" """.format(cookie_name, from_date, to_date)
 
 
-        print(query)
+        # print(query)
         result = cursor.execute(query).fetchall()
         connection.commit()
         connection.close()
@@ -396,28 +393,6 @@ def dict_factory(cursor, row):
 def hash(msg):
     return hashlib.sha256(msg.encode('utf-8')).hexdigest()
 
-
-def nbr_seats(performance_id):
-    nbr_seats_left = 0
-    connection = sqlite3.connect("database.db")
-    cursor = connection.cursor()
-
-    query = """
-                SELECT  ABS(capacity - count())
-                FROM    screening
-                LEFT JOIN    theater
-                ON      theater.name = screening.theater_name
-                LEFT JOIN    ticket
-                USING   (performance_id)
-                WHERE   performance_id = '{}'
-            """.format(performance_id)
-
-    result = cursor.execute(query).fetchall()
-    print("asdasdasdasdasdasdasdasdasdads")
-    print(query)
-    print(result)
-
-    return result[0][0]
 
 if __name__ == '__main__':
     app.run(port=8888)
