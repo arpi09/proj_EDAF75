@@ -156,8 +156,8 @@ def ingredients():
     cursor = connection.cursor()
 
     query = "SELECT ingredient_name AS name, storage_amount AS quantity, unit FROM ingredients"
-    
-    
+
+
     print(query)
     result = cursor.execute(query).fetchall()
 
@@ -173,66 +173,110 @@ def POST_pallets():
     cursor = connection.cursor()
 
     cookie = request.args.get('cookie')
-    
-    
+
+
     test1 = """
         SELECT cookie_name
-        FROM pallets
+        FROM cookies
         WHERE cookie_name =  \"{}\"
     """.format(cookie)
 
     test1_result = cursor.execute(test1).fetchall()
-    
-    print(json.dumps(test1_result, indent=4) + '\n')
+    print(test1_result)
     if not test1_result:
-        return {"status":"no such cookie"}
+        print("klajdaiosdjaiosdnhasiodhasoihdasuid")
+        return json.dumps({"status":"no such cookie"})
 
 
 # test ingredients
-    # test2 = """
-    # 
-    #     SELECT name, available, cost
-    #     FROM
-    # 
-    #         (SELECT ingredient_name AS name, ingredient_amount AS cost
-    #         FROM cookie_contents
-    #         WHERE cookie_name =  \"{}\")
-    # 
-    #     JOIN
-    # 
-    #         (SELECT ingredient_name AS name, storage_amount AS available
-    #         FROM ingredients
-    #         WHERE cookie_name =  \"{}\")
-    # 
-    #     USING(name)
-    # 
-    # WHERE (54 * cost) > available
-    # 
-    # """.format(cookie, cookie)
-    # 
-    # test2_result = cursor.execute(test2).fetchall()
-    # print(json.dumps(test2_result, indent=4) + '\n')
-    # if not test2_result:
-    #     return {"status":"not enough ingredients"}
+    test2 = """
+
+        SELECT name, available, cost
+        FROM
+
+            (SELECT ingredient_name AS name, ingredient_amount AS cost
+            FROM cookie_contents
+            WHERE cookie_name =  \"{}\")
+
+        LEFT JOIN
+
+            (SELECT ingredient_name AS name, storage_amount AS available
+            FROM ingredients
+            JOIN cookie_contents
+                USING( ingredient_name)
+            WHERE cookie_name =  \"{}\")
+
+        USING(name)
+
+    WHERE ((54 * cost) > available) OR (available is NULL)
+
+    """.format(cookie, cookie)
+
+    test2_result = cursor.execute(test2).fetchall()
+    print("a1")
+    print(json.dumps(test2_result, indent=4) + '\n')
+    print("a2")
+    if  test2_result:
+        print("a3")
+        return json.dumps({"status":"not enough ingredients"})
 
 
-    query = """
-        INSERT INTO pallets (production_date, blocked, cookie_name, order_id)
-            VALUES ( date('now'), 0, \"{}\", NULL )
-    """.format(cookie)
-    print(query)
-    
-    
-    
+
+
+
+
     # format output  perhaps use SELECT LAST_INSERT_ID();
-    
-    
-    result = cursor.execute(query).fetchall()
-    result = {"status": result}
-    connection.commit()
-    connection.close()
 
-    return json.dumps(result, indent=4) + '\n'
+
+    else:
+        print("opkopkiofhofhjiofghjfioh")
+        cursor = connection.cursor()
+
+
+        query_two = """SELECT ingredient_name, ingredient_amount
+        FROM cookie_contents
+        WHERE cookie_name = \"{}\"""".format(cookie)
+
+        result2 = cursor.execute(query_two).fetchall()
+        for item in result2:
+            query_three = """
+            UPDATE ingredients
+            SET storage_amount = storage_amount - {}*54
+            WHERE ingredient_name = \"{}\"
+            """.format(item['ingredient_amount'], item['ingredient_name'])
+            cursor.execute(query_three)
+
+
+        query = """
+        INSERT INTO pallets (production_date, blocked, cookie_name, order_id)
+        VALUES ( date('now'), 0, \"{}\", NULL )
+        """.format(cookie)
+        cursor.execute(query)
+
+
+        queryid = """
+                SELECT pallet_number
+                FROM pallets
+                WHERE rowid = last_insert_rowid()
+                """
+
+        result = cursor.execute(queryid).fetchall()
+        print(result)
+
+
+        connection.commit()
+        data = {"status": "ok", "id": ""}
+        data["id"] = result[0]['pallet_number']
+        connection.close()
+        print(data)
+        return json.dumps(data)
+
+
+    # result = cursor.execute(query).fetchall()
+    # result = {"status": result}
+    # connection.commit()
+    # connection.close()
+    #
 
 
 @app.route('/pallets', methods=['GET'])
@@ -274,8 +318,8 @@ def GET_pallets():
         print(result)
         connection.commit()
         connection.close()
-        
-        
+
+
     result = {"pallets": result}
     return json.dumps(result, indent=4) + '\n'
 
